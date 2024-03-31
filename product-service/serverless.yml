@@ -1,12 +1,11 @@
 service: product-service
-frameworkVersion: '2'
-variablesResolutionMode: 20210219
+frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs20.x
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
+  region: eu-west-1
   environment:
     ENV_STAGE: ${opt:stage, 'dev'}
     PGHOST: ${self:custom.dotenvVars.PGHOST, env:PGHOST, ''}
@@ -20,11 +19,18 @@ plugins:
 
 custom:
   webpack:
-    webpackConfig: 'webpack.config.js'
+    webpackConfig: "webpack.config.js"
     includeModules: true
     dotenvVars: ${file(configs.js)}
 
 functions:
+  getProductsList:
+    handler: handler.getProductsList
+    events:
+      - http:
+          path: products
+          method: get
+          cors: true
   getProductById:
     handler: handler.getProductById
     events:
@@ -36,20 +42,20 @@ functions:
             parameters:
               paths:
                 productId: true
-  getAllProducts:
-    handler: handler.getAllProducts
-    events:
-      - http:
-          path: products
-          method: get
-          cors: true
-  createProduct:
-    handler: handler.createProduct
-    events:
-      - http:
-          path: products
-          method: post
-          cors: true
-          request:
-              schema:
-                application/json: ${file(src/schemas/createProductSchema.json)}
+  # getAllProducts:
+  #   handler: handler.getAllProducts
+  #   events:
+  #     - http:
+  #         path: products
+  #         method: get
+  #         cors: true
+  # createProduct:
+  #   handler: handler.createProduct
+  #   events:
+  #     - http:
+  #         path: products
+  #         method: post
+  #         cors: true
+  #         request:
+  #           schema:
+  #             application/json: ${file(src/schemas/createProductSchema.json)}
