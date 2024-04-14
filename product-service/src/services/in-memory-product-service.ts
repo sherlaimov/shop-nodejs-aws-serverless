@@ -1,4 +1,5 @@
-import { ProductServiceInterface, ProductInterface } from './products';
+import { InMemoryProduct } from '../models';
+import { ProductServiceInterface } from './products';
 import products from './products-data.json';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,7 +14,7 @@ class InMemoryProductService implements ProductServiceInterface {
 
   create(
     product: Pick<
-      ProductInterface,
+      InMemoryProduct,
       'title' | 'description' | 'price' | 'logo' | 'count'
     >
   ) {
@@ -21,6 +22,7 @@ class InMemoryProductService implements ProductServiceInterface {
       id: uuidv4(),
       ...product,
     });
+
     return Promise.resolve(products[products.length - 1]);
   }
 }

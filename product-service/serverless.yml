@@ -7,12 +7,25 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: eu-west-1
   environment:
+    # tableName: ${self:custom.tableName}
     ENV_STAGE: ${opt:stage, 'dev'}
     PGHOST: ${self:custom.dotenvVars.PGHOST, env:PGHOST, ''}
     PGUSER: ${self:custom.dotenvVars.PGUSER, env:PGUSER, ''}
     PGDATABASE: ${self:custom.dotenvVars.PGDATABASE, env:PGDATABASE, ''}
     PGPASSWORD: ${self:custom.dotenvVars.PGPASSWORD, env:PGPASSWORD, ''}
     PGPORT: ${self:custom.dotenvVars.PGPORT, env:PGPORT, ''}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+          - 'arn:aws:dynamodb:eu-west-1:*:table/*' 
 
 plugins:
   - serverless-webpack
@@ -30,6 +43,13 @@ functions:
       - http:
           path: products
           method: get
+          cors: true
+  createProduct:
+    handler: handler.createProduct
+    events:
+      - http:
+          path: products
+          method: post
           cors: true
   getProductById:
     handler: handler.getProductById
@@ -59,3 +79,6 @@ functions:
   #         request:
   #           schema:
   #             application/json: ${file(src/schemas/createProductSchema.json)}
+resources:
+  # DynamoDB
+  - ${file(resources/dynamodb-tables.yml)}

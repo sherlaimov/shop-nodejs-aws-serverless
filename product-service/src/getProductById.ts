@@ -1,9 +1,12 @@
+import { type APIGatewayProxyEvent, type Context } from 'aws-lambda';
+
 import { ProductServiceInterface } from './services/products';
 import { winstonLogger } from './utils/winstonLogger';
 import { errorResponse, successResponse } from './utils/apiResponseBuilder';
 
 export const getProductByIdHandler =
-  (productService: ProductServiceInterface) => async (event, _context) => {
+  (productService: ProductServiceInterface) =>
+  async (event: APIGatewayProxyEvent, _context: Context) => {
     try {
       winstonLogger.logRequest(`Incoming event: ${JSON.stringify(event)}`);
 

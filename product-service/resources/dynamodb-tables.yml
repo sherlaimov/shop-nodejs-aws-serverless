@@ -1,0 +1,27 @@
+Resources:
+  Products:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: Products
+      AttributeDefinitions:
+      - AttributeName: "id"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "id"
+        KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  Stock:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: Stock
+      AttributeDefinitions:
+      - AttributeName: "product_id"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "product_id"
+        KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1

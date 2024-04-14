@@ -1,12 +1,14 @@
 import * as handlers from './src';
-import { InMemoryProductService } from './src/services/in-memory-product-service';
-
-const inMemoryProductService = new InMemoryProductService();
+import { dynamoDBProductService } from './src/services/dynamodb-product-service';
 
 export const getProductById = handlers.getProductByIdHandler(
-  inMemoryProductService
+  dynamoDBProductService
 );
 
 export const getProductsList = handlers.getProductsListHandler(
-  inMemoryProductService
+  dynamoDBProductService
+);
+
+export const createProduct = handlers.createProductHandler(
+  dynamoDBProductService
 );
