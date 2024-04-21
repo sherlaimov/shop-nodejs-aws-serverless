@@ -5,7 +5,7 @@ interface LoggerInterface {
   logError: (message: string) => void;
 }
 
-class WinstonLogger implements LoggerInterface {
+export class WinstonLogger implements LoggerInterface {
   private readonly logger: any;
   private readonly format: any;
 

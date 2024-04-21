@@ -9,32 +9,32 @@
     "deploy:prod": "sls deploy --stage prod",
     "remove:dev-stack": "sls remove --stage dev --region eu-west-1",
     "remove:prod-stack": "sls remove --stage prod --region eu-west-1",
-    "populateTable": "cross-env AWS_REGION=eu-west-1 ts-node src/utils/populateTable.ts"
+    "populateTable": "cross-env REGION=eu-west-1 ts-node src/utils/populateTable.ts"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.137",
-    "@types/node": "^10.17.56",
-    "@types/pg": "^7.14.11",
-    "@types/serverless": "^1.78.23",
-    "@types/uuid": "^8.3.0",
+    "@types/node": "^20.12.7",
+    "@types/pg": "^8.11.5",
+    "@types/serverless": "^3.12.22",
+    "@types/uuid": "^9.0.8",
     "cross-env": "^7.0.3",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.4.5",
     "fork-ts-checker-webpack-plugin": "^9.0.2",
     "serverless": "^3.38.0",
     "serverless-webpack": "^5.13.0",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.3",
+    "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-node-externals": "^3.0.0"
   },
   "author": "JSCC",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.554.0",
-    "@aws-sdk/lib-dynamodb": "^3.554.0",
-    "pg": "^8.6.0",
-    "uuid": "^8.3.2",
-    "winston": "^3.3.3"
+    "@aws-sdk/client-dynamodb": "^3.556.0",
+    "@aws-sdk/lib-dynamodb": "^3.556.0",
+    "pg": "^8.11.5",
+    "uuid": "^9.0.1",
+    "winston": "^3.13.0"
   }
 }

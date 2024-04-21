@@ -1,36 +1,64 @@
 import csv from 'csv-parser';
-const BUCKET = process.env.BUCKET;
+import {
+  S3Client,
+  DeleteObjectCommand,
+  PutObjectCommand,
+} from '@aws-sdk/client-s3';
+import { type S3Event } from 'aws-lambda';
+
+import { WinstonLogger } from './utils/winstonLogger';
+
+const { AWS_BUCKET_NAME } = process.env;
+const s3Client = new S3Client({ region: process.env.REGION });
 
 export const importFileParser =
-  ({ s3, logger }) =>
-  async (event) => {
-    event.Records.forEach((record) => {
+  ({ s3, logger }: { s3: AWS.S3; logger: WinstonLogger }) =>
+  async (event: S3Event) => {
+    if (!event.Records) {
+      logger.logError('Record not found in importFileParser.ts lambda.');
+      return;
+    }
+
+    for (const record of event.Records) {
       const s3Stream = s3
         .getObject({
-          Bucket: BUCKET,
+          Bucket: AWS_BUCKET_NAME,
           Key: record.s3.object.key,
         })
         .createReadStream();
 
-      s3Stream
-        .pipe(csv())
-        .on('data', (data) => {
-          logger.log(data);
-        })
-        .on('end', async () => {
-          logger.log(`Copy from ${BUCKET}/${record.s3.object.key}`);
+      const csvData = [];
+      await new Promise((resolve, reject) => {
+        s3Stream
+          ?.pipe(csv())
+          .on('data', (data: string) => {
+            csvData.push(data);
+          })
+          .on('error', reject)
+          .on('end', resolve);
+      });
 
-          await s3
-            .copyObject({
-              Bucket: BUCKET,
-              CopySource: `${BUCKET}/${record.s3.object.key}`,
-              Key: record.s3.object.key.replace('uploaded', 'parsed'),
-            })
-            .promise();
+      const putObjectParams = {
+        Bucket: AWS_BUCKET_NAME,
+        Key: record.s3.object.key.replace('uploaded', 'parsed'),
+        Body: JSON.stringify(csvData),
+      };
 
-          logger.log(
-            `Copied into ${BUCKET}/${record.s3.object.key.replace('uploaded', 'parsed')}`
-          );
-        });
-    });
+      await s3Client.send(new PutObjectCommand(putObjectParams));
+
+      logger.logRequest(
+        `File copied into ${AWS_BUCKET_NAME}/${record.s3.object.key.replace('uploaded', 'parsed')}`
+      );
+
+      const deleteObjectParams = {
+        Bucket: AWS_BUCKET_NAME,
+        Key: record.s3.object.key,
+      };
+
+      await s3Client.send(new DeleteObjectCommand(deleteObjectParams));
+
+      logger.logRequest(
+        `File deleted from ${AWS_BUCKET_NAME}/${record.s3.object.key}`
+      );
+    }
   };

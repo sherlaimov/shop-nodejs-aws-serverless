@@ -2,7 +2,7 @@ import { DynamoDB, config } from 'aws-sdk';
 import { products, stocks } from '../mocks';
 
 const dynamoDb = new DynamoDB.DocumentClient();
-config.update({ region: process.env.AWS_REGION });
+config.update({ region: process.env.REGION });
 
 const populateTable = async <
   T extends DynamoDB.DocumentClient.PutItemInputAttributeMap,

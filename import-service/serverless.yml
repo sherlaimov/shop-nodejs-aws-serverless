@@ -1,24 +1,29 @@
 service: import-service
-frameworkVersion: '2'
-variablesResolutionMode: 20210219
+frameworkVersion: '3'
 
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs20.x
   stage: ${opt:stage, 'dev'}
-  region: us-east-1
+  region: eu-west-1
+  environment:
+    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
+    AWS_BUCKET_NAME: 'import-service-epam-bucket'
+    AWS_FOLDER_NAME: 'uploaded'
+    REGION: 'eu-west-1'
+
 
   iamRoleStatements:
     - Effect: "Allow"
       Action: "s3:ListBucket"
       Resource:
-        - "arn:aws:s3:::node-in-aws-cloud-catalogs"
+        - "arn:aws:s3:::import-service-epam-bucket"
     - Effect: "Allow"
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::node-in-aws-cloud-catalogs/*"
+        - "arn:aws:s3:::import-service-epam-bucket/*"
 
 plugins:
   - serverless-webpack
@@ -44,7 +49,10 @@ functions:
 
   importFileParser:
     handler: handler.importFileParser
+    events:
       - s3:
-          bucket: uploaded
+          bucket: import-service-epam-bucket
           event: s3:ObjectCreated:*
+          rules:
+                - prefix: uploaded/
           existing: true

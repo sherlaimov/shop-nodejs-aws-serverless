@@ -8,6 +8,7 @@ provider:
   region: eu-west-1
   environment:
     # tableName: ${self:custom.tableName}
+    REGION: 'eu-west-1'
     ENV_STAGE: ${opt:stage, 'dev'}
     PGHOST: ${self:custom.dotenvVars.PGHOST, env:PGHOST, ''}
     PGUSER: ${self:custom.dotenvVars.PGUSER, env:PGUSER, ''}
