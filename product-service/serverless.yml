@@ -7,7 +7,6 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: eu-west-1
   environment:
-    # tableName: ${self:custom.tableName}
     REGION: 'eu-west-1'
     ENV_STAGE: ${opt:stage, 'dev'}
     PGHOST: ${self:custom.dotenvVars.PGHOST, env:PGHOST, ''}
@@ -15,6 +14,7 @@ provider:
     PGDATABASE: ${self:custom.dotenvVars.PGDATABASE, env:PGDATABASE, ''}
     PGPASSWORD: ${self:custom.dotenvVars.PGPASSWORD, env:PGPASSWORD, ''}
     PGPORT: ${self:custom.dotenvVars.PGPORT, env:PGPORT, ''}
+    CREATE_PRODUCT_SNS_ARN: arn:aws:sns:eu-west-1:984152597152:createProductTopic
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -27,6 +27,11 @@ provider:
         - dynamodb:DeleteItem
       Resource:
           - 'arn:aws:dynamodb:eu-west-1:*:table/*' 
+    - Effect: "Allow"
+      Action:
+        - "sns:Publish"
+      Resource:
+        - Ref: "createProductTopic"
 
 plugins:
   - serverless-webpack
@@ -63,23 +68,68 @@ functions:
             parameters:
               paths:
                 productId: true
-  # getAllProducts:
-  #   handler: handler.getAllProducts
-  #   events:
-  #     - http:
-  #         path: products
-  #         method: get
-  #         cors: true
-  # createProduct:
-  #   handler: handler.createProduct
-  #   events:
-  #     - http:
-  #         path: products
-  #         method: post
-  #         cors: true
-  #         request:
-  #           schema:
-  #             application/json: ${file(src/schemas/createProductSchema.json)}
+  catalogBatchProcess:
+    handler: handler.catalogBatchProcess
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - catalogItemsQueue
+              - Arn
+          batchSize: 5
+      - sns:
+          arn: !Ref createProductTopic
+          topicName: createProductTopic
+          filterPolicyScope: MessageBody
+          filterPolicy:
+            price:
+              - 50
+
 resources:
-  # DynamoDB
-  - ${file(resources/dynamodb-tables.yml)}
+  Resources:
+    Products:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Products
+        AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    Stock:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: Stock
+        AttributeDefinitions:
+        - AttributeName: "product_id"
+          AttributeType: "S"
+        KeySchema:
+        - AttributeName: "product_id"
+          KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "catalogItemsQueue"
+        MessageRetentionPeriod: 60
+
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: "createProductTopic"
+
+    emailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: "email"
+        Endpoint: "sherlaimov@gmail.com"
+        TopicArn:
+          Ref: "createProductTopic"
+  

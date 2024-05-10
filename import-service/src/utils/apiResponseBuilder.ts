@@ -29,10 +29,7 @@ const errorResponse = (
   };
 };
 
-const successResponse = (
-  body: Object,
-  statusCode: number = 200
-): ResponseInterface => {
+const successResponse = (body: Object, statusCode = 200): ResponseInterface => {
   winstonLogger.logRequest(`Lambda successfully invoked and finished`);
 
   return {

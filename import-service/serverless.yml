@@ -12,7 +12,7 @@ provider:
     AWS_BUCKET_NAME: 'import-service-epam-bucket'
     AWS_FOLDER_NAME: 'uploaded'
     REGION: 'eu-west-1'
-
+    SQS_URL: https://sqs.eu-west-1.amazonaws.com/984152597152/catalogItemsQueue
 
   iamRoleStatements:
     - Effect: "Allow"
@@ -24,6 +24,10 @@ provider:
         - "s3:*"
       Resource:
         - "arn:aws:s3:::import-service-epam-bucket/*"
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+      Resource: "arn:aws:sqs:eu-west-1:984152597152:catalogItemsQueue"
 
 plugins:
   - serverless-webpack
@@ -51,7 +55,7 @@ functions:
     handler: handler.importFileParser
     events:
       - s3:
-          bucket: import-service-epam-bucket
+          bucket: ${self:provider.environment.AWS_BUCKET_NAME}
           event: s3:ObjectCreated:*
           rules:
                 - prefix: uploaded/
