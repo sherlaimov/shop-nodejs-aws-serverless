@@ -28,6 +28,8 @@
   "license": "MIT",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.556.0",
+    "@aws-sdk/client-sqs": "^3.569.0",
+    "@aws-sdk/s3-request-presigner": "^3.569.0",
     "aws-sdk": "^2.1603.0",
     "csv-parser": "^3.0.0",
     "winston": "^3.13.0"

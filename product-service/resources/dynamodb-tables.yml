@@ -1,4 +1,3 @@
-Resources:
   Products:
     Type: "AWS::DynamoDB::Table"
     Properties:

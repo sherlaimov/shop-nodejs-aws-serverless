@@ -12,3 +12,5 @@ export const getProductsList = handlers.getProductsListHandler(
 export const createProduct = handlers.createProductHandler(
   dynamoDBProductService
 );
+
+export const catalogBatchProcess = handlers.catalogBatchProcessHandler;
